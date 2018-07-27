@@ -106,29 +106,6 @@ class Click
     }
 
     /**
-     * @param string $field
-     * @param array $values
-     */
-    protected function setWhere($field, $values)
-    {
-        $values = (array)$values;
-        if (!$values) return;
-        if (count($values) > 1) {
-            $in = array();
-            foreach ($values as $value) {
-                $pv = 'p'.count($this->param);
-                $in[] = ':'.$pv;
-                $this->param[$pv] = $value;
-            }
-            $this->where[] = $field.' IN (' . implode(', ', $in) . ')';
-        } else {
-            $pv = 'p'.count($this->param);
-            $this->where[] = $field.' = :'.$pv;
-            $this->param[$pv] = $values[0];
-        }
-    }
-
-    /**
      * @param int[]|int $years
      */
     public function timeYears($years)
@@ -372,7 +349,23 @@ class Click
      */
     public function offers($offers)
     {
-        $this->setWhere('`offer`', $offers);
+        $this->setWhere('`offer_id`', $offers);
+    }
+
+    /**
+     * @param string[]|string $networks
+     */
+    public function offerNetworks($networks)
+    {
+        $this->setWhere('`offer_network`', $networks);
+    }
+
+    /**
+     * @param string[]|string $categories
+     */
+    public function offerCategories($categories)
+    {
+        $this->setWhere('`offer_category`', $categories);
     }
 
     /**
@@ -437,5 +430,28 @@ class Click
         $statement->query = $sql;
         $statement->parameters = $this->param;
         return $statement;
+    }
+
+    /**
+     * @param string $field
+     * @param array $values
+     */
+    protected function setWhere($field, $values)
+    {
+        $values = (array)$values;
+        if (!$values) return;
+        if (count($values) > 1) {
+            $in = array();
+            foreach ($values as $value) {
+                $pv = 'p'.count($this->param);
+                $in[] = ':'.$pv;
+                $this->param[$pv] = $value;
+            }
+            $this->where[] = $field.' IN (' . implode(', ', $in) . ')';
+        } else {
+            $pv = 'p'.count($this->param);
+            $this->where[] = $field.' = :'.$pv;
+            $this->param[$pv] = $values[0];
+        }
     }
 }

@@ -75,9 +75,13 @@ CREATE TABLE `clicks` (
   `keyword` TEXT,
   `rule_hash` TEXT,
   `rule` TEXT,
-  `offer` TEXT,
   `request` TEXT,
   `response` TEXT,
+  `ip` TEXT,
+  `offer_id` TEXT,
+  `offer_category` TEXT,
+  `offer_network` TEXT,
+  `offer` TEXT,
   `device_type` TEXT,
   `device_vendor` TEXT,
   `device_model` TEXT,
@@ -93,7 +97,6 @@ CREATE TABLE `clicks` (
   `bot_owner` TEXT,
   `bot_type` TEXT,
   `bot_name` TEXT,
-  `ip` TEXT,
   `lead` INTEGER,
   `status` TEXT,
   `cost_amount` TEXT,
@@ -136,6 +139,9 @@ CREATE INDEX `os_version` ON `clicks` (`os_version`);
 CREATE INDEX `browser_name` ON `clicks` (`browser_name`);
 CREATE INDEX `browser_version` ON `clicks` (`browser_version`);
 CREATE INDEX `browser_engine` ON `clicks` (`browser_engine`);
+CREATE INDEX `offer_id` ON `clicks` (`offer_id`);
+CREATE INDEX `offer_category` ON `clicks` (`offer_category`);
+CREATE INDEX `offer_network` ON `clicks` (`offer_network`);
 CREATE INDEX `lead` ON `clicks` (`lead`);
 CREATE INDEX `status` ON `clicks` (`status`);
 CREATE INDEX `token_name` ON `tokens` (`token`);
@@ -178,16 +184,18 @@ SQL;
         if (!$this->tokenStatement()) return false;
         $this->clickStatement()->execute([
             $click->time->format(DATE_W3C),
-            $click->traffic->campaign,
-            $click->traffic->source,
-            $click->traffic->creative,
-            $click->traffic->keyword,
-            md5($click->traffic->rule),
-            $click->traffic->rule,
-            $click->traffic->offer,
-            $click->traffic->request,
-            $click->traffic->response,
-            $click->traffic->ip,
+            $click->campaign,
+            $click->source,
+            $click->creative,
+            $click->keyword,
+            md5($click->rule),
+            $click->rule,
+            $click->request,
+            $click->response,
+            $click->ip,
+            $click->offer->id,
+            $click->offer->category,
+            $click->offer->network,
             $click->device->type,
             $click->device->vendor,
             $click->device->model,
@@ -286,15 +294,17 @@ SQL;
             $click = new ClickDTO();
             $click->id = $row['id'];
             $click->time = new DateTime($row['time']);
-            $click->traffic->campaign = (string)$row['campaign'];
-            $click->traffic->source = (string)$row['source'];
-            $click->traffic->creative = (string)$row['creative'];
-            $click->traffic->keyword = (string)$row['keyword'];
-            $click->traffic->response = (string)$row['response'];
-            $click->traffic->request = (string)$row['request'];
-            $click->traffic->offer = (string)$row['offer'];
-            $click->traffic->rule = (string)$row['rule'];
-            $click->traffic->ip = (string)$row['ip'];
+            $click->campaign = (string)$row['campaign'];
+            $click->source = (string)$row['source'];
+            $click->creative = (string)$row['creative'];
+            $click->keyword = (string)$row['keyword'];
+            $click->response = (string)$row['response'];
+            $click->request = (string)$row['request'];
+            $click->rule = (string)$row['rule'];
+            $click->ip = (string)$row['ip'];
+            $click->offer->id = (string)$row['offer_id'];
+            $click->offer->category = (string)$row['offer_category'];
+            $click->offer->network = (string)$row['offer_network'];
             $click->device->type = (string)$row['device_type'];;
             $click->device->vendor = (string)$row['device_vendor'];
             $click->device->model = (string)$row['device_model'];
@@ -389,10 +399,12 @@ INSERT INTO `clicks` (
   `keyword`,
   `rule_hash`,
   `rule`,
-  `offer`,
   `request`,
   `response`,
   `ip`,
+  `offer_id`,
+  `offer_category`,
+  `offer_network`,
   `device_type`,
   `device_vendor`,
   `device_model`,
@@ -415,7 +427,7 @@ INSERT INTO `clicks` (
   `profit_amount`,
   `profit_currency`
 ) VALUES (
-  ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
+  ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
 )
 SQL;
 

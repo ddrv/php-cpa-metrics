@@ -319,11 +319,28 @@ class Statistics
     /**
      * @param void
      */
-
     public function groupOffer()
     {
-        $this->group['offer'] = 'offer';
-        $this->select['offer'] = '`offer`';
+        $this->group['offer_id'] = 'offer_id';
+        $this->select['offer_id'] = '`offer_id`';
+    }
+
+    /**
+     * @param void
+     */
+    public function groupOfferNetwork()
+    {
+        $this->group['offer_network'] = 'offer_network';
+        $this->select['offer_network'] = '`offer_network`';
+    }
+
+    /**
+     * @param void
+     */
+    public function groupOfferCategory()
+    {
+        $this->group['offer_category'] = 'offer_category';
+        $this->select['offer_category'] = '`offer_category`';
     }
 
     /**

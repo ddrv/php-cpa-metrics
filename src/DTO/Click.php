@@ -17,9 +17,49 @@ class Click
     public $time;
 
     /**
-     * @var Traffic
+     * @var string
      */
-    public $traffic;
+    public $campaign;
+
+    /**
+     * @var string
+     */
+    public $source;
+
+    /**
+     * @var string
+     */
+    public $creative;
+
+    /**
+     * @var string
+     */
+    public $keyword;
+
+    /**
+     * @var string
+     */
+    public $request;
+
+    /**
+     * @var string
+     */
+    public $response;
+
+    /**
+     * @var string
+     */
+    public $rule;
+
+    /**
+     * @var string
+     */
+    public $ip;
+
+    /**
+     * @var Offer
+     */
+    public $offer;
 
     /**
      * @var Device
@@ -72,8 +112,8 @@ class Click
     public function __construct()
     {
         $this->time = new DateTime();
-        $this->traffic = new Traffic();
         $this->device = new Device();
+        $this->offer = new Offer();
         $this->os = new Os();
         $this->browser = new Browser();
         $this->geo = new Geo();
