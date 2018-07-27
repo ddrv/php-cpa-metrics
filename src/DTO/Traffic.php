@@ -46,11 +46,6 @@ class Traffic
     public $offer;
 
     /**
-     * @var string[]
-     */
-    public $tokens;
-
-    /**
      * @param string $campaign
      * @param string $source
      * @param string $creative
@@ -59,7 +54,6 @@ class Traffic
      * @param string $response
      * @param string $rule
      * @param string $offer
-     * @param string $tokens
      */
     public function __construct(
         $campaign = '',
@@ -69,8 +63,7 @@ class Traffic
         $request = '',
         $response = '',
         $rule = '',
-        $offer = '',
-        $tokens = array()
+        $offer = ''
     ) {
         $this->campaign = (string)$campaign;
         $this->source = (string)$source;
@@ -80,6 +73,5 @@ class Traffic
         $this->response = (string)$response;
         $this->rule = (string)$rule;
         $this->offer = (string)$offer;
-        $this->tokens = (array)$tokens;
     }
 }

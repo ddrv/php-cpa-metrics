@@ -190,9 +190,9 @@ class Click
     /**
      * @param string[]|string $sources
      */
-    public function trafficSources($sources)
+    public function sources($sources)
     {
-        $this->setWhere('`traffic_source`', $sources);
+        $this->setWhere('`source`', $sources);
     }
 
     /**

@@ -62,6 +62,11 @@ class Click
     public $lead;
 
     /**
+     * @var string[]
+     */
+    public $tokens;
+
+    /**
      * @param void
      */
     public function __construct()
@@ -76,6 +81,7 @@ class Click
         $this->cost = new Price();
         $this->profit = new Price();
         $this->lead = new Lead();
+        $this->tokens = array();
 
     }
 }

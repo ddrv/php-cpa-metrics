@@ -69,7 +69,7 @@ CREATE TABLE `clicks` (
   `id` INTEGER PRIMARY KEY AUTOINCREMENT,
   `time` TIMESTAMP,
   `campaign` TEXT,
-  `traffic_source` TEXT,
+  `source` TEXT,
   `creative` TEXT,
   `keyword` TEXT,
   `rule_hash` TEXT,
@@ -115,7 +115,7 @@ CREATE INDEX `time` ON `clicks` (`time`);
 CREATE INDEX `ip_address` ON `clicks` (`ip_address`);
 CREATE INDEX `ip_bot` ON `clicks` (`ip_bot`);
 CREATE INDEX `campaign` ON `clicks` (`campaign`);
-CREATE INDEX `traffic_source` ON `clicks` (`traffic_source`);
+CREATE INDEX `source` ON `clicks` (`source`);
 CREATE INDEX `creative` ON `clicks` (`creative`);
 CREATE INDEX `keyword` ON `clicks` (`keyword`);
 CREATE INDEX `rule_hash` ON `clicks` (`rule_hash`);
@@ -208,7 +208,7 @@ SQL;
             $this->db->rollBack();
             return false;
         }
-        foreach ($click->traffic->tokens as $token => $value) {
+        foreach ($click->tokens as $token => $value) {
             $res = $this->tokenStatement()->execute([$clickId, $token, $value]);
             if (!$res) {
                 $this->db->rollBack();
@@ -280,12 +280,11 @@ SQL;
             $click->id = $row['id'];
             $click->time = new DateTime($row['time']);
             $click->traffic->campaign = (string)$row['campaign'];
-            $click->traffic->source = (string)$row['traffic_source'];
+            $click->traffic->source = (string)$row['source'];
             $click->traffic->creative = (string)$row['creative'];
             $click->traffic->keyword = (string)$row['keyword'];
             $click->traffic->response = (string)$row['response'];
             $click->traffic->request = (string)$row['request'];
-            $click->traffic->tokens = array();
             $click->traffic->offer = (string)$row['offer'];
             $click->traffic->rule = (string)$row['rule'];
             $click->device->type = (string)$row['device_type'];;
@@ -308,11 +307,12 @@ SQL;
             $click->cost->currency = (string)$row['cost_currency'];
             $click->profit->amount = (double)$row['profit_amount'];
             $click->profit->currency = (string)$row['profit_currency'];
+            $click->tokens = array();
             $result[$row['id']] = $click;
         }
         $r = $this->db->query('SELECT * FROM `tokens` WHERE `click_id` IN ('.implode(', ', array_keys($result)).')');
         while ($row  = $r->fetch(PDO::FETCH_ASSOC)) {
-            $result[$row['click_id']]->traffic->tokens[$row['token']] = $row['value'];
+            $result[$row['click_id']]->tokens[$row['token']] = $row['value'];
         }
         return array_values($result);
     }
@@ -369,7 +369,7 @@ $sql = <<<SQL
 INSERT INTO `clicks` (
   `time`,
   `campaign`,
-  `traffic_source`,
+  `source`,
   `creative`,
   `keyword`,
   `rule_hash`,

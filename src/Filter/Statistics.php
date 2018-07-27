@@ -150,8 +150,8 @@ class Statistics
      */
     public function groupTrafficSource()
     {
-        $this->group['traffic_source'] = 'traffic_source';
-        $this->select['traffic_source'] = '`traffic_source`';
+        $this->group['source'] = 'source';
+        $this->select['source'] = '`source`';
     }
 
     /**
