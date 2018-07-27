@@ -338,14 +338,6 @@ class Statistics
     /**
      * @param string $token
      */
-    public function token($token)
-    {
-        $this->tokens[$token] = $token;
-    }
-
-    /**
-     * @param string $token
-     */
     public function groupToken($token)
     {
         $this->tokens[$token] = $token;

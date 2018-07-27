@@ -3,6 +3,7 @@
 namespace Cpa\Metrics;
 
 use Cpa\Metrics\DTO\Click as ClickDTO;
+use Cpa\Metrics\DTO\Clicks;
 use Cpa\Metrics\Filter\Click as ClickFilter;
 use Cpa\Metrics\DTO\Statistics as StatisticsDTO;
 use Cpa\Metrics\Filter\Statistics as StatisticsFilter;
@@ -273,11 +274,11 @@ SQL;
 
     /**
      * @param ClickFilter $filter
-     * @return ClickDTO[]
+     * @return Clicks
      */
     public function clicks(ClickFilter $filter)
     {
-        $result = array();
+        $rows = array();
         $statement = $filter->getStatement();
         $r = $this->db->prepare($statement->query);
         $r->execute($statement->parameters);
@@ -316,13 +317,19 @@ SQL;
             $click->profit->amount = (double)$row['profit_amount'];
             $click->profit->currency = (string)$row['profit_currency'];
             $click->tokens = array();
-            $result[$row['id']] = $click;
+            $rows[$row['id']] = $click;
         }
-        $r = $this->db->query('SELECT * FROM `tokens` WHERE `click_id` IN ('.implode(', ', array_keys($result)).')');
+        $r = $this->db->query('SELECT * FROM `tokens` WHERE `click_id` IN ('.implode(', ', array_keys($rows)).')');
         while ($row  = $r->fetch(PDO::FETCH_ASSOC)) {
-            $result[$row['click_id']]->tokens[$row['token']] = $row['value'];
+            $rows[$row['click_id']]->tokens[$row['token']] = $row['value'];
         }
-        return array_values($result);
+        $statement = $filter->getCountStatement();
+        $r = $this->db->prepare($statement->query);
+        $r->execute($statement->parameters);
+        $result = new Clicks();
+        $result->count = $r->fetchColumn();
+        $result->items = array_values($rows);
+        return $result;
     }
 
     /**

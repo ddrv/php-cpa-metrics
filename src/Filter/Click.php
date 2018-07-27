@@ -28,8 +28,6 @@ class Click
         '*',
     );
 
-
-
     /**
      * @var array
      */
@@ -49,6 +47,16 @@ class Click
      * @var array
      */
     protected $param = array();
+
+    /**
+     * @var int
+     */
+    protected $offset = 0;
+
+    /**
+     * @var int
+     */
+    protected $count = 100;
 
     /**
      * @param void
@@ -71,6 +79,25 @@ class Click
     public function to($time)
     {
         $this->to = $time;
+    }
+
+    /**
+     * @param int $offset
+     */
+    public function offset($offset)
+    {
+        $this->offset = (int)$offset;
+    }
+
+    /**
+     * @param int $count
+     */
+    public function count($count)
+    {
+        $count = (int)$count;
+        if ($count < 1) $count = 1;
+        if ($count > 100) $count = 100;
+        $this->count = $count;
     }
 
     /**
@@ -369,6 +396,21 @@ class Click
             $join[] = ' LEFT JOIN `tokens` ON `tokens`.`click_id` = `clicks`.`id`';
         }
         $sql = 'SELECT '.(implode(', ', $this->select)).' FROM `clicks`'.(implode($join));
+        if ($this->where) $sql .= ' WHERE '.(implode(' AND ', $this->where));
+        $sql .= ' LIMIT '.$this->count.' OFFSET '.$this->offset;
+        $sql .= ';';
+        $statement = new Statement();
+        $statement->query = $sql;
+        $statement->parameters = $this->param;
+        return $statement;
+    }
+
+    /**
+     * @return Statement
+     */
+    public function getCountStatement()
+    {
+        $sql = 'SELECT COUNT(*) AS `count` FROM `clicks`';
         if ($this->where) $sql .= ' WHERE '.(implode(' AND ', $this->where));
         $sql .= ';';
         $statement = new Statement();
