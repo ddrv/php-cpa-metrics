@@ -49,6 +49,11 @@ class Click
     protected $param = array();
 
     /**
+     * @var array
+     */
+    protected $join = array();
+
+    /**
      * @var int
      */
     protected $offset = 0;
@@ -109,13 +114,17 @@ class Click
         $values = (array)$values;
         if (!$values) return;
         if (count($values) > 1) {
-            $this->where[] = $field.' IN (' . implode(', ', array_fill(0, count($values), '?')) . ')';
+            $in = array();
             foreach ($values as $value) {
-                $this->param[] = $value;
+                $pv = 'p'.count($this->param);
+                $in[] = ':'.$pv;
+                $this->param[$pv] = $value;
             }
+            $this->where[] = $field.' IN (' . implode(', ', $in) . ')';
         } else {
-            $this->where[] = $field.' = ?';
-            $this->param[] = $values[0];
+            $pv = 'p'.count($this->param);
+            $this->where[] = $field.' = :'.$pv;
+            $this->param[$pv] = $values[0];
         }
     }
 
@@ -376,10 +385,29 @@ class Click
 
     /**
      * @param string $token
+     * @param string[]|string $values
      */
-    public function token($token)
+    public function token($token, $values)
     {
-        $this->tokens[$token] = $token;
+        $values = (array)$values;
+        if (!$values) return;
+        $this->select[] = '`tokens`.`value` AS `token_' . $token . '`';
+        $p = 'p'.count($this->param);
+        $this->param[$p] = $token;
+        if (count($values) > 1) {
+            $in = array();
+            foreach ($values as $value) {
+                $pv = 'p'.count($this->param);
+                $in[] = ':'.$pv;
+                $this->param[$pv] = $value;
+            }
+            $where = ' IN (' . implode(', ', $in) . ')';
+        } else {
+            $pv = 'p'.count($this->param);
+            $where = ' = :'.$pv;
+            $this->param[$pv] = $values[0];
+        }
+        $this->join[] = ' INNER JOIN `tokens` ON (`tokens`.`click_id` = `clicks`.`id` AND `tokens`.`token` = :'.$p.' AND `tokens`.`value`'.$where.')';
     }
 
     /**
@@ -387,15 +415,7 @@ class Click
      */
     public function getStatement()
     {
-        $join = [];
-        if ($this->tokens) {
-            foreach ($this->tokens as $token) {
-                $this->select[] = '`tokens`.`value` AS `token_' . $token . '`';
-                $where[] = '`tokens`.`token` = \''.$token.'\'';
-            }
-            $join[] = ' LEFT JOIN `tokens` ON `tokens`.`click_id` = `clicks`.`id`';
-        }
-        $sql = 'SELECT '.(implode(', ', $this->select)).' FROM `clicks`'.(implode($join));
+        $sql = 'SELECT '.(implode(', ', $this->select)).' FROM `clicks`'.(implode($this->join));
         if ($this->where) $sql .= ' WHERE '.(implode(' AND ', $this->where));
         $sql .= ' LIMIT '.$this->count.' OFFSET '.$this->offset;
         $sql .= ';';
@@ -410,7 +430,7 @@ class Click
      */
     public function getCountStatement()
     {
-        $sql = 'SELECT COUNT(*) AS `count` FROM `clicks`';
+        $sql = 'SELECT COUNT(*) AS `count` FROM `clicks`'.(implode($this->join));
         if ($this->where) $sql .= ' WHERE '.(implode(' AND ', $this->where));
         $sql .= ';';
         $statement = new Statement();
