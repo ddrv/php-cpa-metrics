@@ -24,7 +24,6 @@ class Device
      * @param string $type
      * @param string $vendor
      * @param string $model
-     * @param bool $bot
      */
     public function __construct($type = '', $vendor = '', $model = '')
     {
