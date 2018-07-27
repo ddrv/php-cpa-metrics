@@ -236,14 +236,6 @@ class Click
     }
 
     /**
-     * @param string[]|string $deviceBots
-     */
-    public function deviceBots($deviceBots)
-    {
-        $this->setWhere('`device_bot`', $deviceBots);
-    }
-
-    /**
      * @param string[]|string $osNames
      */
     public function osNames($osNames)
@@ -308,11 +300,35 @@ class Click
     }
 
     /**
-     * @param string[]|string $bots
+     * @param bool[]|bool $bots
      */
-    public function ipBot($bots)
+    public function bots($bots)
     {
-        $this->setWhere('`ip_bot`', $bots);
+        $this->setWhere('`bot_detected`', $bots);
+    }
+
+    /**
+     * @param string[]|string $botOwners
+     */
+    public function botOwners($botOwners)
+    {
+        $this->setWhere('`bot_owner`', $botOwners);
+    }
+
+    /**
+     * @param string[]|string $botTypes
+     */
+    public function botTypes($botTypes)
+    {
+        $this->setWhere('`bot_type`', $botTypes);
+    }
+
+    /**
+     * @param string[]|string $botNames
+     */
+    public function botNames($botNames)
+    {
+        $this->setWhere('`bot_name`', $botNames);
     }
 
     /**

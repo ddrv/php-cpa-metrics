@@ -80,7 +80,6 @@ CREATE TABLE `clicks` (
   `device_type` TEXT,
   `device_vendor` TEXT,
   `device_model` TEXT,
-  `device_bot` TEXT,
   `os_name` TEXT,
   `os_version` TEXT,
   `browser_name` TEXT,
@@ -89,8 +88,11 @@ CREATE TABLE `clicks` (
   `geo_country` TEXT,
   `geo_area` TEXT,
   `geo_city` TEXT,
-  `ip_address` TEXT,
-  `ip_bot` INTEGER,
+  `bot_detected` INTEGER,
+  `bot_owner` TEXT,
+  `bot_type` TEXT,
+  `bot_name` TEXT,
+  `ip` TEXT,
   `lead` INTEGER,
   `status` TEXT,
   `cost_amount` TEXT,
@@ -112,8 +114,11 @@ CREATE TABLE `currencies` (
 );
 
 CREATE INDEX `time` ON `clicks` (`time`);
-CREATE INDEX `ip_address` ON `clicks` (`ip_address`);
-CREATE INDEX `ip_bot` ON `clicks` (`ip_bot`);
+CREATE INDEX `ip` ON `clicks` (`ip`);
+CREATE INDEX `bot_detected` ON `clicks` (`bot_detected`);
+CREATE INDEX `bot_owner` ON `clicks` (`bot_owner`);
+CREATE INDEX `bot_type` ON `clicks` (`bot_type`);
+CREATE INDEX `bot_name` ON `clicks` (`bot_name`);
 CREATE INDEX `campaign` ON `clicks` (`campaign`);
 CREATE INDEX `source` ON `clicks` (`source`);
 CREATE INDEX `creative` ON `clicks` (`creative`);
@@ -122,7 +127,6 @@ CREATE INDEX `rule_hash` ON `clicks` (`rule_hash`);
 CREATE INDEX `device_type` ON `clicks` (`device_type`);
 CREATE INDEX `device_vendor` ON `clicks` (`device_vendor`);
 CREATE INDEX `device_model` ON `clicks` (`device_model`);
-CREATE INDEX `device_bot` ON `clicks` (`device_bot`);
 CREATE INDEX `geo_country` ON `clicks` (`geo_country`);
 CREATE INDEX `geo_area` ON `clicks` (`geo_area`);
 CREATE INDEX `geo_city` ON `clicks` (`geo_city`);
@@ -182,10 +186,10 @@ SQL;
             $click->traffic->offer,
             $click->traffic->request,
             $click->traffic->response,
+            $click->traffic->ip,
             $click->device->type,
             $click->device->vendor,
             $click->device->model,
-            $click->device->bot,
             $click->os->name,
             $click->os->version,
             $click->browser->name,
@@ -194,8 +198,10 @@ SQL;
             $click->geo->country,
             $click->geo->area,
             $click->geo->city,
-            $click->ip->address,
-            $click->ip->bot,
+            $click->bot->detected,
+            $click->bot->owner,
+            $click->bot->type,
+            $click->bot->name,
             $click->lead->lead,
             $click->lead->status,
             $click->cost->amount,
@@ -290,7 +296,6 @@ SQL;
             $click->device->type = (string)$row['device_type'];;
             $click->device->vendor = (string)$row['device_vendor'];
             $click->device->model = (string)$row['device_model'];
-            $click->device->bot = (bool)$row['device_bot'];
             $click->os->name = (string)$row['os_name'];
             $click->os->version = (string)$row['os_version'];
             $click->browser->name = (string)$row['browser_name'];
@@ -299,8 +304,11 @@ SQL;
             $click->geo->country = (string)$row['geo_country'];
             $click->geo->area = (string)$row['geo_area'];
             $click->geo->city = (string)$row['geo_city'];
-            $click->ip->address = (string)$row['ip_address'];
-            $click->ip->bot = (bool)$row['ip_bot'];
+            $click->ip = (string)$row['ip'];
+            $click->bot->detected = (bool)$row['bot_detected'];
+            $click->bot->owner = (string)$row['bot_owner'];
+            $click->bot->type = (string)$row['bot_type'];
+            $click->bot->name = (string)$row['bot_name'];
             $click->lead->status = (string)$row['status'];
             $click->lead->lead = (bool)$row['lead'];
             $click->cost->amount = (double)$row['cost_amount'];
@@ -377,10 +385,10 @@ INSERT INTO `clicks` (
   `offer`,
   `request`,
   `response`,
+  `ip`,
   `device_type`,
   `device_vendor`,
   `device_model`,
-  `device_bot`,
   `os_name`,
   `os_version`,
   `browser_name`,
@@ -389,8 +397,10 @@ INSERT INTO `clicks` (
   `geo_country`,
   `geo_area`,
   `geo_city`,
-  `ip_address`,
-  `ip_bot`,
+  `bot_detected`,
+  `bot_owner`,
+  `bot_type`,
+  `bot_name`,
   `lead`,
   `status`,
   `cost_amount`,
@@ -398,7 +408,7 @@ INSERT INTO `clicks` (
   `profit_amount`,
   `profit_currency`
 ) VALUES (
-  ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
+  ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
 )
 SQL;
 

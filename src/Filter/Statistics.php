@@ -202,10 +202,37 @@ class Statistics
     /**
      * @param void
      */
-    public function groupDeviceBot()
+    public function groupBot()
     {
-        $this->group['device_bot'] = 'device_bot';
-        $this->select['device_bot'] = '`device_bot`';
+        $this->group['bot_detected'] = 'bot_detected';
+        $this->select['bot_detected'] = '`bot_detected` AS `bot`';
+    }
+
+    /**
+     * @param void
+     */
+    public function groupBotOwner()
+    {
+        $this->group['bot_owner'] = 'bot_owner';
+        $this->select['bot_owner'] = '`bot_owner`';
+    }
+
+    /**
+     * @param void
+     */
+    public function groupBotType()
+    {
+        $this->group['bot_type'] = 'bot_type';
+        $this->select['bot_type'] = '`bot_type`';
+    }
+
+    /**
+     * @param void
+     */
+    public function groupBotName()
+    {
+        $this->group['bot_name'] = 'bot_name';
+        $this->select['bot_name'] = '`bot_name`';
     }
 
     /**
@@ -287,15 +314,6 @@ class Statistics
     {
         $this->group['rule_hash'] = 'rule_hash';
         $this->select['rule_hash'] = '`rule_hash`';
-    }
-
-    /**
-     * @param void
-     */
-    public function groupIpBot()
-    {
-        $this->group['ip_bot'] = 'ip_bot';
-        $this->select['ip_bot'] = '`ip_bot`';
     }
 
     /**

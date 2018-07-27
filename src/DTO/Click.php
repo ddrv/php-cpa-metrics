@@ -42,9 +42,9 @@ class Click
     public $geo;
 
     /**
-     * @var Ip
+     * @var Bot
      */
-    public $ip;
+    public $bot;
 
     /**
      * @var Price
@@ -77,7 +77,7 @@ class Click
         $this->os = new Os();
         $this->browser = new Browser();
         $this->geo = new Geo();
-        $this->ip = new Ip();
+        $this->bot = new Bot();
         $this->cost = new Price();
         $this->profit = new Price();
         $this->lead = new Lead();

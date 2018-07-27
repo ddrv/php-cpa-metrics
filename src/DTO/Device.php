@@ -21,21 +21,15 @@ class Device
     public $model;
 
     /**
-     * @var bool
-     */
-    public $bot;
-
-    /**
      * @param string $type
      * @param string $vendor
      * @param string $model
      * @param bool $bot
      */
-    public function __construct($type = '', $vendor = '', $model = '', $bot = false)
+    public function __construct($type = '', $vendor = '', $model = '')
     {
         $this->type = (string)$type;
         $this->vendor = (string)$vendor;
         $this->model = (string)$model;
-        $this->bot = (bool)$bot;
     }
 }
