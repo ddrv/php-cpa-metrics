@@ -146,7 +146,6 @@ class Metrics
         ksort($empty);
         $statement = $filter->getStatement();
         $r = $this->db->prepare($statement->query);
-        print_r([$statement->query, $statement->parameters]);
         $r->execute($statement->parameters);
         $row = null;
         while ($row  = $r->fetch(PDO::FETCH_ASSOC)) {
