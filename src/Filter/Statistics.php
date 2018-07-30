@@ -27,6 +27,7 @@ class Statistics
     protected $select = array(
         'count' => 'COUNT (*) AS `count`',
         'leads' => 'SUM (`lead`) AS `leads`',
+        'uniques' => 'SUM (`unique_visit`) AS `uniques`',
         'cost' => 'SUM (`cost_amount`) AS `cost`',
         'profit' => 'SUM (`profit_amount`) AS `profit`',
         'cost_currency' => '`cost_currency`',
@@ -37,8 +38,8 @@ class Statistics
      * @var array
      */
     protected $group = array(
-        'cost_currency' => 'cost_currency',
-        'profit_currency' => 'profit_currency',
+        'cost_currency' => '`cost_currency`',
+        'profit_currency' => '`profit_currency`',
     );
 
     /**
@@ -353,6 +354,15 @@ class Statistics
     }
 
     /**
+     * @param void
+     */
+    public function groupUnique()
+    {
+        $this->group['unique'] = '`group_unique`';
+        $this->select['status'] = '`unique_visit` AS `group_unique`';
+    }
+
+    /**
      * @param string $token
      */
     public function groupToken($token)
@@ -382,10 +392,10 @@ class Statistics
         }
         if ($this->tokens) {
             foreach ($this->tokens as $token) {
-                $this->select[] = '`tokens`.`value` AS `token_' . $token . '`';
+                $this->select[] = '`tokens_'.$token.'`.`value` AS `token_' . $token . '`';
                 $params[] = $token;
+                $join[] = ' LEFT JOIN `tokens` AS `tokens_'.$token.'` ON (`tokens_'.$token.'`.`click_id` = `clicks`.`id` AND `tokens_'.$token.'`.`token` = ?)';
             }
-            $join[] = ' LEFT JOIN `tokens` ON (`tokens`.`click_id` = `clicks`.`id` AND `tokens`.`token` = ?)';
         }
         $sql = 'SELECT '.(implode(', ', $this->select)).' FROM `clicks`'.(implode($join));
         if ($where) $sql .= ' WHERE '.(implode(' AND ', $where));

@@ -29,6 +29,7 @@ CREATE TABLE `clicks` (
   `bot_owner` TEXT,
   `bot_type` TEXT,
   `bot_name` TEXT,
+  `unique_visit` INTEGER,
   `lead` INTEGER,
   `status` TEXT,
   `cost_amount` TEXT,
@@ -50,6 +51,7 @@ CREATE TABLE `currencies` (
 );
 
 CREATE INDEX `time` ON `clicks` (`time`);
+CREATE INDEX `unique_visit` ON `clicks` (`unique_visit`);
 CREATE INDEX `ip` ON `clicks` (`ip`);
 CREATE INDEX `bot_detected` ON `clicks` (`bot_detected`);
 CREATE INDEX `bot_owner` ON `clicks` (`bot_owner`);

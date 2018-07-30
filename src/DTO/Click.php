@@ -107,6 +107,11 @@ class Click
     public $tokens;
 
     /**
+     * @var bool
+     */
+    public $unique;
+
+    /**
      * @param void
      */
     public function __construct()
@@ -122,6 +127,6 @@ class Click
         $this->profit = new Price();
         $this->lead = new Lead();
         $this->tokens = array();
-
+        $this->unique = false;
     }
 }

@@ -384,7 +384,7 @@ class Click
     {
         $values = (array)$values;
         if (!$values) return;
-        $this->select[] = '`tokens`.`value` AS `token_' . $token . '`';
+        $this->select[] = '`tokens_'.$token.'`.`value` AS `token_' . $token . '`';
         $p = 'p'.count($this->param);
         $this->param[$p] = $token;
         if (count($values) > 1) {
@@ -394,13 +394,22 @@ class Click
                 $in[] = ':'.$pv;
                 $this->param[$pv] = $value;
             }
-            $where = ' IN (' . implode(', ', $in) . ')';
+            $this->where[] = '`token_'.$token.'` IN (' . implode(', ', $in) . ')';
         } else {
             $pv = 'p'.count($this->param);
-            $where = ' = :'.$pv;
+            $this->where[] = '`token_'.$token.'` = :'.$pv;
             $this->param[$pv] = $values[0];
         }
-        $this->join[] = ' INNER JOIN `tokens` ON (`tokens`.`click_id` = `clicks`.`id` AND `tokens`.`token` = :'.$p.' AND `tokens`.`value`'.$where.')';
+        $this->join[] = ' LEFT JOIN `tokens` AS `tokens_'.$token.'` ON (`tokens_'.$token.'`.`click_id` = `clicks`.`id` AND `tokens_'.$token.'`.`token` = :'.$p.')';
+    }
+
+    /**
+     * @param $unique
+     */
+    public function unique($unique)
+    {
+        $unique = (array)$unique;
+        $this->setWhere('`unique_visit`', $unique);
     }
 
     /**
