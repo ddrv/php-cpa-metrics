@@ -120,17 +120,27 @@ class Metrics
 
     /**
      * @param StatisticsFilter $filter
+     * @param bool $flat
      * @return StatisticsDTO
      */
-    public function statistics(StatisticsFilter $filter)
+    public function statistics(StatisticsFilter $filter, $flat = true)
     {
+        $flat = (bool)$flat;
         $result = new StatisticsDTO();
         $rows = array();
         $empty = array();
         $r = $this->db->query('SELECT `code` FROM `currencies`');
         while ($row  = $r->fetch(PDO::FETCH_ASSOC)) {
-            $empty['cost_'.$row['code']] = 0;
-            $empty['profit_'.$row['code']] = 0;
+            if ($flat) {
+                $empty['cost_'.$row['code']] = 0;
+                $empty['profit_'.$row['code']] = 0;
+            } else {
+                $empty['cost'][$row['code']] = 0;
+                $empty['profit'][$row['code']] = 0;
+            }
+        }
+        if (empty($empty)) {
+            $empty = $flat?array('cost' => 0, 'profit' => 0):array('cost' => array(), 'profit' => array());
         }
         ksort($empty);
         $statement = $filter->getStatement();
@@ -146,7 +156,15 @@ class Metrics
             unset($tmp['count']);
             unset($tmp['leads']);
             $key = implode('.', $tmp);
-
+            if (!$flat) {
+                $t = array();
+                foreach ($tmp as $k=>$v) {
+                    if (preg_match('/^(?<k>token|group)_(?<v>.*)$/ui', $k, $m)) {
+                        $t[$m['k']][$m['v']] = $v;
+                    }
+                }
+                $tmp = $t;
+            }
             if (!isset($rows[$key])) {
                 $rows[$key] = $tmp;
                 $rows[$key]['count'] = $row['count'];
@@ -155,12 +173,26 @@ class Metrics
             } else {
                 $rows[$key]['count'] += $row['count'];
                 $rows[$key]['leads'] += $row['leads'];
-                if ($row['cost'] > 0) $rows[$key]['cost_'.$row['cost_currency']] += $row['cost'];
-                if ($row['profit'] > 0) $rows[$key]['profit_'.$row['profit_currency']] += $row['profit'];
+                if ($flat) {
+                    if ($row['cost'] > 0) $rows[$key]['cost_' . $row['cost_currency']] += $row['cost'];
+                    if ($row['profit'] > 0) $rows[$key]['profit_' . $row['profit_currency']] += $row['profit'];
+                } else {
+                    if ($row['cost'] > 0) $rows[$key]['cost'][$row['cost_currency']] += $row['cost'];
+                    if ($row['profit'] > 0) $rows[$key]['profit'][$row['profit_currency']] += $row['profit'];
+                }
             }
         }
         $result->rows = array_values($rows);
-        if ($result->rows) $result->head = array_keys($result->rows[0]);
+        if ($result->rows) {
+            $result->head = array_fill_keys(array_keys($result->rows[0]), null);
+            if (!$flat) {
+                foreach (array('group', 'token', 'cost', 'profit') as $k) {
+                    if (isset($result->rows[0][$k])) {
+                        $result->head[$k] = array_fill_keys(array_keys($result->rows[0][$k]), null);
+                    }
+                }
+            }
+        }
         return $result;
     }
 
