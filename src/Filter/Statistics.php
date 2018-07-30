@@ -398,6 +398,14 @@ class Statistics
             }
         }
         $sql = 'SELECT '.(implode(', ', $this->select)).' FROM `clicks`'.(implode($join));
+        if ($this->from && $this->from instanceof DateTime) {
+            $where[] = '`clicks`.`time` >= ?';
+            $params[] = $this->from->format(DATE_W3C);
+        }
+        if ($this->to && $this->to instanceof DateTime) {
+            $where[] = '`clicks`.`time` <= ?';
+            $params[] = $this->to->format(DATE_W3C);
+        }
         if ($where) $sql .= ' WHERE '.(implode(' AND ', $where));
         if ($group) $sql .= ' GROUP BY '.(implode(', ',$group));
 

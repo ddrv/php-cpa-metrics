@@ -417,6 +417,16 @@ class Click
      */
     public function getStatement()
     {
+        if ($this->from && $this->from instanceof DateTime) {
+            $p = 'p'.count($this->param);
+            $this->where[] = '`clicks`.`time` >= :'.$p;
+            $this->param[$p] = $this->from->format(DATE_W3C);
+        }
+        if ($this->to && $this->to instanceof DateTime) {
+            $p = 'p'.count($this->param);
+            $this->where[] = '`clicks`.`time` <= :'.$p;
+            $this->param[$p] = $this->to->format(DATE_W3C);
+        }
         $sql = 'SELECT '.(implode(', ', $this->select)).' FROM `clicks`'.(implode($this->join));
         if ($this->where) $sql .= ' WHERE '.(implode(' AND ', $this->where));
         $sql .= ' LIMIT '.$this->count.' OFFSET '.$this->offset;
@@ -432,6 +442,16 @@ class Click
      */
     public function getCountStatement()
     {
+        if ($this->from && $this->from instanceof DateTime) {
+            $p = 'p'.count($this->param);
+            $this->where[] = '`clicks`.`time` >= :'.$p;
+            $this->param[$p] = $this->from->format(DATE_W3C);
+        }
+        if ($this->to && $this->to instanceof DateTime) {
+            $p = 'p'.count($this->param);
+            $this->where[] = '`clicks`.`time` <= :'.$p;
+            $this->param[$p] = $this->to->format(DATE_W3C);
+        }
         $sql = 'SELECT COUNT(*) AS `count` FROM `clicks`'.(implode($this->join));
         if ($this->where) $sql .= ' WHERE '.(implode(' AND ', $this->where));
         $sql .= ';';
