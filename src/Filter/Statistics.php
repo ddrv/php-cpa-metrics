@@ -205,7 +205,7 @@ class Statistics
      */
     public function groupBot()
     {
-        $this->group['bot_detected'] = '`group_bot_detected`';
+        $this->group['bot_detected'] = '`group_bot`';
         $this->select['bot_detected'] = '`bot_detected` AS `group_bot`';
     }
 
