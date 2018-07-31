@@ -10,6 +10,7 @@ use Cpa\Metrics\Filter\Statistics as StatisticsFilter;
 use PDO;
 use PDOStatement;
 use DateTime;
+use DateTimeZone;
 
 /**
  * Class Metrics
@@ -66,6 +67,7 @@ class Metrics
         $this->db->beginTransaction();
         if (!$this->clickStatement()) return false;
         if (!$this->tokenStatement()) return false;
+        $click->time->setTimezone(new DateTimeZone('+00:00'));
         $this->clickStatement()->execute([
             $click->time->format(DATE_W3C),
             $click->campaign,

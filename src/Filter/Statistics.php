@@ -4,6 +4,7 @@ namespace Cpa\Metrics\Filter;
 
 use Cpa\Metrics\DTO\Statement;
 use DateTime;
+use DateTimeZone;
 
 /**
  * Class Statistics
@@ -53,10 +54,16 @@ class Statistics
     protected $tokens = array();
 
     /**
-     * @param void
+     * @var DateTimeZone
      */
-    public function __construct()
+    protected $timezone;
+
+    /**
+     * @param string
+     */
+    public function __construct($timezone = '+00:00')
     {
+        $this->timezone = new DateTimeZone($timezone);
     }
 
     /**
@@ -72,6 +79,7 @@ class Statistics
      */
     public function from($time)
     {
+        $time->setTimezone(new DateTimeZone('+00:00'));
         $this->from = $time;
     }
 
@@ -80,6 +88,7 @@ class Statistics
      */
     public function to($time)
     {
+        $time->setTimezone(new DateTimeZone('+00:00'));
         $this->to = $time;
     }
 
@@ -89,7 +98,7 @@ class Statistics
     public function groupTimeYear()
     {
         $this->group['year'] = '`group_year`';
-        $this->select[] = 'strftime(\'%Y\', `clicks`.`time`) AS `group_year`';
+        $this->select[] = 'strftime(\'%Y\', `clicks`.`time`, \''.$this->timezone->getName().'\') AS `group_year`';
     }
 
     /**
@@ -98,7 +107,7 @@ class Statistics
     public function groupTimeMonth()
     {
         $this->group['month'] = '`group_month`';
-        $this->select['month'] = 'strftime(\'%m\', `clicks`.`time`) AS `group_month`';
+        $this->select['month'] = 'strftime(\'%m\', `clicks`.`time`, \''.$this->timezone->getName().'\') AS `group_month`';
     }
 
     /**
@@ -107,7 +116,7 @@ class Statistics
     public function groupTimeDay()
     {
         $this->group['day'] = '`group_day`';
-        $this->select['day'] = 'strftime(\'%d\', `clicks`.`time`) AS `group_day`';
+        $this->select['day'] = 'strftime(\'%d\', `clicks`.`time`, \''.$this->timezone->getName().'\') AS `group_day`';
     }
 
     /**
@@ -116,7 +125,7 @@ class Statistics
     public function groupTimeHour()
     {
         $this->group['hour'] = '`group_hour`';
-        $this->select['hour'] = 'strftime(\'%H\', `clicks`.`time`) AS `group_hour`';
+        $this->select['hour'] = 'strftime(\'%H\', `clicks`.`time`, \''.$this->timezone->getName().'\') AS `group_hour`';
     }
 
     /**
@@ -125,7 +134,7 @@ class Statistics
     public function groupTimeMinute()
     {
         $this->group['minute'] = '`group_minute`';
-        $this->select['minute'] = 'strftime(\'%M\', `clicks`.`time`) AS `group_minute`';
+        $this->select['minute'] = 'strftime(\'%M\', `clicks`.`time`, \''.$this->timezone->getName().'\') AS `group_minute`';
     }
 
     /**
@@ -134,7 +143,7 @@ class Statistics
     public function groupTimeWeekday()
     {
         $this->group['weekday'] = '`group_weekday`';
-        $this->select['weekday'] = 'strftime(\'%w\', `clicks`.`time`) AS `group_weekday`';
+        $this->select['weekday'] = 'strftime(\'%w\', `clicks`.`time`, \''.$this->timezone->getName().'\') AS `group_weekday`';
     }
 
     /**

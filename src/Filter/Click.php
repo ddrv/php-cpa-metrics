@@ -4,6 +4,7 @@ namespace Cpa\Metrics\Filter;
 
 use Cpa\Metrics\DTO\Statement;
 use DateTime;
+use DateTimeZone;
 
 /**
  * Class Statistics
@@ -27,11 +28,6 @@ class Click
     protected $select = array(
         '*',
     );
-
-    /**
-     * @var array
-     */
-    protected $campaigns = array();
 
     /**
      * @var array
@@ -64,10 +60,16 @@ class Click
     protected $count = 100;
 
     /**
-     * @param void
+     * @var DateTimeZone
      */
-    public function __construct()
+    protected $timezone;
+
+    /**
+     * @param string
+     */
+    public function __construct($timezone = '+00:00')
     {
+        $this->timezone = new DateTimeZone($timezone);
     }
 
     /**
@@ -75,6 +77,7 @@ class Click
      */
     public function from($time)
     {
+        $time->setTimezone(new DateTimeZone('+00:00'));
         $this->from = $time;
     }
 
@@ -83,6 +86,7 @@ class Click
      */
     public function to($time)
     {
+        $time->setTimezone(new DateTimeZone('+00:00'));
         $this->to = $time;
     }
 
@@ -110,7 +114,7 @@ class Click
      */
     public function timeYears($years)
     {
-        $this->setWhere('strftime(\'%Y\', `clicks`.`time`)', $years);
+        $this->setWhere('strftime(\'%Y\', `clicks`.`time`, \''.$this->timezone->getName().'\')', $years);
     }
 
     /**
@@ -126,7 +130,7 @@ class Click
             if ($mnth < 10) $mnth = '0'.$mnth;
             $mnths[] = $mnth;
         }
-        $this->setWhere('strftime(\'%m\', `clicks`.`time`)', $mnths);
+        $this->setWhere('strftime(\'%m\', `clicks`.`time`, \''.$this->timezone->getName().'\')', $mnths);
     }
 
     /**
@@ -142,7 +146,7 @@ class Click
             if ($d < 10) $d = '0'.$d;
             $ds[] = $d;
         }
-        $this->setWhere('strftime(\'%d\', `clicks`.`time`)', $ds);
+        $this->setWhere('strftime(\'%d\', `clicks`.`time`, \''.$this->timezone->getName().'\')', $ds);
     }
 
     /**
@@ -158,7 +162,7 @@ class Click
             if ($h < 10) $h = '0'.$h;
             $hs[] = $h;
         }
-        $this->setWhere('strftime(\'%H\', `clicks`.`time`)', $hs);
+        $this->setWhere('strftime(\'%H\', `clicks`.`time`, \''.$this->timezone->getName().'\')', $hs);
     }
 
     /**
@@ -174,7 +178,7 @@ class Click
             if ($m < 10) $m = '0'.$m;
             $ms[] = $m;
         }
-        $this->setWhere('strftime(\'%M\', `clicks`.`time`)', $ms);
+        $this->setWhere('strftime(\'%M\', `clicks`.`time`, \''.$this->timezone->getName().'\')', $ms);
     }
 
     /**
@@ -189,7 +193,7 @@ class Click
             if ($wd < 1 && $wd > 7) continue;
             $wds[] = $wd;
         }
-        $this->setWhere('strftime(\'%w\', `clicks`.`time`)', $wds);
+        $this->setWhere('strftime(\'%w\', `clicks`.`time`, \''.$this->timezone->getName().'\')', $wds);
     }
 
     /**
@@ -197,7 +201,7 @@ class Click
      */
     public function campaigns($campaigns)
     {
-        $this->campaigns = (array)$campaigns;
+        $this->setWhere('`campaign`', $campaigns);
     }
 
     /**
@@ -468,6 +472,7 @@ class Click
     protected function setWhere($field, $values)
     {
         $values = (array)$values;
+        $values = array_values($values);
         if (!$values) return;
         if (count($values) > 1) {
             $in = array();
