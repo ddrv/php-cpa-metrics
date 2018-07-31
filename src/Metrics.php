@@ -57,6 +57,8 @@ class Metrics
             $this->createDatabase($file);
         }
         $this->db = new PDO('sqlite:'.$file);
+        $this->db->exec('PRAGMA foreign_keys = ON;');
+        $this->db->exec('PRAGMA journal_mode = WAL;');
     }
 
     /**
@@ -313,7 +315,7 @@ class Metrics
     protected function clickStatement()
     {
         if (!$this->click) {
-$sql = <<<SQL
+            $sql = <<<SQL
 INSERT INTO `clicks` (
   `time`,
   `campaign`,

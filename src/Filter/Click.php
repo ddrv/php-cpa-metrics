@@ -26,7 +26,7 @@ class Click
      * @var array
      */
     protected $select = array(
-        '*',
+        '`clicks`.*',
     );
 
     /**
@@ -393,22 +393,22 @@ class Click
         $values = (array)$values;
         if (!$values) return;
         $this->select[] = '`tokens_'.$token.'`.`value` AS `token_' . $token . '`';
-        $p = 'p'.count($this->param);
+        $p = ':p'.count($this->param);
         $this->param[$p] = $token;
         if (count($values) > 1) {
             $in = array();
             foreach ($values as $value) {
-                $pv = 'p'.count($this->param);
-                $in[] = ':'.$pv;
+                $pv = ':p'.count($this->param);
+                $in[] = $pv;
                 $this->param[$pv] = $value;
             }
             $this->where[] = '`token_'.$token.'` IN (' . implode(', ', $in) . ')';
         } else {
-            $pv = 'p'.count($this->param);
-            $this->where[] = '`token_'.$token.'` = :'.$pv;
-            $this->param[$pv] = $values[0];
+            $pv = ':p'.count($this->param);
+            $this->where[] = '`tokens_'.$token.'`.`value` = '.$pv;
+            $this->param[$pv] = array_shift($values);
         }
-        $this->join[] = ' LEFT JOIN `tokens` AS `tokens_'.$token.'` ON (`tokens_'.$token.'`.`click_id` = `clicks`.`id` AND `tokens_'.$token.'`.`token` = :'.$p.')';
+        $this->join[] = ' LEFT JOIN `tokens` AS `tokens_'.$token.'` ON (`tokens_'.$token.'`.`click_id` = `clicks`.`id` AND `tokens_'.$token.'`.`token` = '.$p.')';
     }
 
     /**
@@ -426,13 +426,13 @@ class Click
     public function getStatement()
     {
         if ($this->from && $this->from instanceof DateTime) {
-            $p = 'p'.count($this->param);
-            $this->where[] = '`clicks`.`time` >= :'.$p;
+            $p = ':p'.count($this->param);
+            $this->where[] = '`clicks`.`time` >= '.$p;
             $this->param[$p] = $this->from->format(DATE_W3C);
         }
         if ($this->to && $this->to instanceof DateTime) {
-            $p = 'p'.count($this->param);
-            $this->where[] = '`clicks`.`time` <= :'.$p;
+            $p = ':p'.count($this->param);
+            $this->where[] = '`clicks`.`time` <= '.$p;
             $this->param[$p] = $this->to->format(DATE_W3C);
         }
         $sql = 'SELECT '.(implode(', ', $this->select)).' FROM `clicks`'.(implode($this->join));
@@ -451,13 +451,13 @@ class Click
     public function getCountStatement()
     {
         if ($this->from && $this->from instanceof DateTime) {
-            $p = 'p'.count($this->param);
-            $this->where[] = '`clicks`.`time` >= :'.$p;
+            $p = ':p'.count($this->param);
+            $this->where[] = '`clicks`.`time` >= '.$p;
             $this->param[$p] = $this->from->format(DATE_W3C);
         }
         if ($this->to && $this->to instanceof DateTime) {
-            $p = 'p'.count($this->param);
-            $this->where[] = '`clicks`.`time` <= :'.$p;
+            $p = ':p'.count($this->param);
+            $this->where[] = '`clicks`.`time` <= '.$p;
             $this->param[$p] = $this->to->format(DATE_W3C);
         }
         $sql = 'SELECT COUNT(*) AS `count` FROM `clicks`'.(implode($this->join));
@@ -476,20 +476,18 @@ class Click
     protected function setWhere($field, $values)
     {
         $values = (array)$values;
-        $values = array_values($values);
-        if (!$values) return;
         if (count($values) > 1) {
             $in = array();
             foreach ($values as $value) {
-                $pv = 'p'.count($this->param);
-                $in[] = ':'.$pv;
+                $pv = ':p'.count($this->param);
+                $in[] = $pv;
                 $this->param[$pv] = $value;
             }
             $this->where[] = $field.' IN (' . implode(', ', $in) . ')';
         } else {
-            $pv = 'p'.count($this->param);
-            $this->where[] = $field.' = :'.$pv;
-            $this->param[$pv] = $values[0];
+            $pv = ':p'.count($this->param);
+            $this->where[] = $field.' = '.$pv;
+            $this->param[$pv] = array_shift($values);
         }
     }
 }
