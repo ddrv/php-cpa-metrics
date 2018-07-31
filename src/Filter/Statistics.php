@@ -59,11 +59,15 @@ class Statistics
     protected $timezone;
 
     /**
-     * @param string
+     * @param DateTimeZone $timezone
      */
-    public function __construct($timezone = '+00:00')
+    public function __construct(DateTimeZone $timezone = null)
     {
-        $this->timezone = new DateTimeZone($timezone);
+        if (is_null($timezone)) {
+            $this->timezone = new DateTimeZone('+00:00');
+        } else {
+            $this->timezone = $timezone;
+        }
     }
 
     /**
