@@ -402,7 +402,7 @@ class Click
                 $in[] = $pv;
                 $this->param[$pv] = $value;
             }
-            $this->where[] = '`token_'.$token.'` IN (' . implode(', ', $in) . ')';
+            $this->where[] = '`tokens_'.$token.'`.`value` IN (' . implode(', ', $in) . ')';
         } else {
             $pv = ':p'.count($this->param);
             $this->where[] = '`tokens_'.$token.'`.`value` = '.$pv;
@@ -437,7 +437,7 @@ class Click
         }
         $sql = 'SELECT '.(implode(', ', $this->select)).' FROM `clicks`'.(implode($this->join));
         if ($this->where) $sql .= ' WHERE '.(implode(' AND ', $this->where));
-        $sql .= ' LIMIT '.$this->count.' OFFSET '.$this->offset;
+        $sql .= ' ORDER BY `clicks`.`time` LIMIT '.$this->count.' OFFSET '.$this->offset;
         $sql .= ';';
         $statement = new Statement();
         $statement->query = $sql;
