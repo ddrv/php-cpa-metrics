@@ -173,14 +173,14 @@ class Metrics
             }
             if (!isset($rows[$key])) {
                 $rows[$key] = $tmp;
-                $rows[$key]['count'] = $row['count'];
-                $rows[$key]['uniques'] = $row['uniques'];
-                $rows[$key]['leads'] = $row['leads'];
+                $rows[$key]['count'] = (int)$row['count'];
+                $rows[$key]['uniques'] = (int)$row['uniques'];
+                $rows[$key]['leads'] = (int)$row['leads'];
                 $rows[$key] = array_replace($rows[$key], $empty);
             } else {
-                $rows[$key]['uniques'] += $row['uniques'];
-                $rows[$key]['count'] += $row['count'];
-                $rows[$key]['leads'] += $row['leads'];
+                $rows[$key]['uniques'] += (int)$row['uniques'];
+                $rows[$key]['count'] += (int)$row['count'];
+                $rows[$key]['leads'] += (int)$row['leads'];
                 if ($flat) {
                     if ($row['cost'] > 0) $rows[$key]['cost_' . $row['cost_currency']] += $row['cost'];
                     if ($row['profit'] > 0) $rows[$key]['profit_' . $row['profit_currency']] += $row['profit'];
@@ -265,6 +265,64 @@ class Metrics
         $result->count = $r->fetchColumn();
         $result->items = array_values($rows);
         return $result;
+    }
+
+    /**
+     * @param int $id
+     * @return ClickDTO
+     */
+    public function get($id)
+    {
+        $r = $this->db->prepare(
+            'SELECT * FROM `clicks` LEFT JOIN `tokens` ON `tokens`.`click_id` = `clicks`.`id` WHERE `clicks`.`id` = ?'
+        );
+        $r->execute(array((int)$id));
+        $click = null;
+        while ($row  = $r->fetch(PDO::FETCH_ASSOC)) {
+            $click = new ClickDTO();
+            $click->id = $row['id'];
+            $click->time = new DateTime($row['time']);
+            $click->campaign = (string)$row['campaign'];
+            $click->source = (string)$row['source'];
+            $click->creative = (string)$row['creative'];
+            $click->keyword = (string)$row['keyword'];
+            $click->response = (string)$row['response'];
+            $click->request = (string)$row['request'];
+            $click->rule = (string)$row['rule'];
+            $click->ip = (string)$row['ip'];
+            $click->offer->id = (string)$row['offer_id'];
+            $click->offer->category = (string)$row['offer_category'];
+            $click->offer->network = (string)$row['offer_network'];
+            $click->device->type = (string)$row['device_type'];;
+            $click->device->vendor = (string)$row['device_vendor'];
+            $click->device->model = (string)$row['device_model'];
+            $click->os->name = (string)$row['os_name'];
+            $click->os->version = (string)$row['os_version'];
+            $click->browser->name = (string)$row['browser_name'];
+            $click->browser->version = (string)$row['browser_version'];
+            $click->browser->engine = (string)$row['browser_engine'];
+            $click->geo->country = (string)$row['geo_country'];
+            $click->geo->area = (string)$row['geo_area'];
+            $click->geo->city = (string)$row['geo_city'];
+            $click->bot->detected = (bool)$row['bot_detected'];
+            $click->bot->owner = (string)$row['bot_owner'];
+            $click->bot->type = (string)$row['bot_type'];
+            $click->bot->name = (string)$row['bot_name'];
+            $click->lead->status = (string)$row['status'];
+            $click->lead->lead = (bool)$row['lead'];
+            $click->cost->amount = (double)$row['cost_amount'];
+            $click->cost->currency = (string)$row['cost_currency'];
+            $click->profit->amount = (double)$row['profit_amount'];
+            $click->profit->currency = (string)$row['profit_currency'];
+            $click->unique = (bool)$row['unique_visit'];
+            if (!empty($row['token'])) {
+                $click->tokens[(string)$row['token']] = (string)$row['value'];
+            }
+        }
+        if ($click && !is_array($click->tokens)) {
+            $click->tokens = array();
+        }
+        return $click;
     }
 
     /**
