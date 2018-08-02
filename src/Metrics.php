@@ -62,6 +62,16 @@ class Metrics
     }
 
     /**
+     * @return int
+     */
+    public function next()
+    {
+        $r = $this->db->prepare('INSERT INTO `clicks` (`id`) VALUES (NULL);');
+        $r->execute();
+        return (int)$this->db->lastInsertId();
+    }
+
+    /**
      * @param ClickDTO $click
      * @return bool
      */
@@ -69,8 +79,9 @@ class Metrics
         $this->db->beginTransaction();
         if (!$this->clickStatement()) return false;
         if (!$this->tokenStatement()) return false;
+        if (!$click->id) $click->id = $this->next();
         $click->time->setTimezone(new DateTimeZone('+00:00'));
-        $this->clickStatement()->execute([
+        $this->clickStatement()->execute(array(
             $click->time->format(DATE_W3C),
             $click->campaign,
             $click->source,
@@ -106,14 +117,15 @@ class Metrics
             $click->profit->amount,
             $click->profit->currency,
             $click->unique,
-        ]);
+            $click->id,
+        ));
         $clickId = $this->db->lastInsertId();
         if (!$clickId) {
             $this->db->rollBack();
             return false;
         }
         foreach ($click->tokens as $token => $value) {
-            $res = $this->tokenStatement()->execute([$clickId, $token, $value]);
+            $res = $this->tokenStatement()->execute(array($clickId, $token, $value));
             if (!$res) {
                 $this->db->rollBack();
                 return false;
@@ -332,11 +344,11 @@ class Metrics
      */
     public function lead($clickId, $lead, $status)
     {
-        $this->leadStatement()->execute([
+        $this->leadStatement()->execute(array(
             $status,
             $lead,
             $clickId,
-        ]);
+        ));
     }
 
     /**
@@ -346,11 +358,11 @@ class Metrics
      */
     public function profit($clickId, $amount, $currency)
     {
-        $this->profitStatement()->execute([
+        $this->profitStatement()->execute(array(
             $amount,
             $currency,
             $clickId,
-        ]);
+        ));
     }
 
     /**
@@ -360,11 +372,11 @@ class Metrics
      */
     public function cost($clickId, $amount, $currency)
     {
-        $this->costStatement()->execute([
+        $this->costStatement()->execute(array(
             $amount,
             $currency,
             $clickId,
-        ]);
+        ));
     }
 
     /**
@@ -374,45 +386,43 @@ class Metrics
     {
         if (!$this->click) {
             $sql = <<<SQL
-INSERT INTO `clicks` (
-  `time`,
-  `campaign`,
-  `source`,
-  `creative`,
-  `keyword`,
-  `rule_hash`,
-  `rule`,
-  `request`,
-  `response`,
-  `ip`,
-  `offer_id`,
-  `offer_category`,
-  `offer_network`,
-  `device_type`,
-  `device_vendor`,
-  `device_model`,
-  `os_name`,
-  `os_version`,
-  `browser_name`,
-  `browser_version`,
-  `browser_engine`,
-  `geo_country`,
-  `geo_area`,
-  `geo_city`,
-  `bot_detected`,
-  `bot_owner`,
-  `bot_type`,
-  `bot_name`,
-  `lead`,
-  `status`,
-  `cost_amount`,
-  `cost_currency`,
-  `profit_amount`,
-  `profit_currency`,
-  `unique_visit`
-) VALUES (
-  ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
-)
+UPDATE `clicks` SET
+  `time` = ?,
+  `campaign` = ?,
+  `source` = ?,
+  `creative` = ?,
+  `keyword` = ?,
+  `rule_hash` = ?,
+  `rule` = ?,
+  `request` = ?,
+  `response` = ?,
+  `ip` = ?,
+  `offer_id` = ?,
+  `offer_category` = ?,
+  `offer_network` = ?,
+  `device_type` = ?,
+  `device_vendor` = ?,
+  `device_model` = ?,
+  `os_name` = ?,
+  `os_version` = ?,
+  `browser_name` = ?,
+  `browser_version` = ?,
+  `browser_engine` = ?,
+  `geo_country` = ?,
+  `geo_area` = ?,
+  `geo_city` = ?,
+  `bot_detected` = ?,
+  `bot_owner` = ?,
+  `bot_type` = ?,
+  `bot_name` = ?,
+  `lead` = ?,
+  `status` = ?,
+  `cost_amount` = ?,
+  `cost_currency` = ?,
+  `profit_amount` = ?,
+  `profit_currency` = ?,
+  `unique_visit` = ?
+  WHERE `id` = ?;
 SQL;
 
             $this->click = $this->db->prepare($sql);
