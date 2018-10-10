@@ -138,9 +138,10 @@ class Metrics
     /**
      * @param StatisticsFilter $filter
      * @param bool $flat
+     * @param bool $keys
      * @return StatisticsDTO
      */
-    public function statistics(StatisticsFilter $filter, $flat = true)
+    public function statistics(StatisticsFilter $filter, $flat = true, $keys=false)
     {
         $flat = (bool)$flat;
         $result = new StatisticsDTO();
@@ -202,7 +203,7 @@ class Metrics
                 }
             }
         }
-        $result->rows = array_values($rows);
+        $result->rows = ($keys)?$rows:array_values($rows);
         if ($result->rows) {
             $result->head = array_fill_keys(array_keys($result->rows[0]), null);
             if (!$flat) {
